@@ -1,0 +1,59 @@
+using System;
+
+public struct Answer
+{
+    private string _name;
+    private int _count;
+    private static int _totalCount;
+
+    public Answer(string Name, int Count)
+    {
+        _name = Name;
+        _count = Count;
+        _totalCount += Count;
+    }
+
+    public string Name => _name;
+    public int Count => _count;
+    public static int TotalCount => _totalCount;
+
+    public void PrintAnswer()
+    {
+        Console.Write($"Name: {_name}, Count: {_count} ");
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Answer[] Ans = new Answer[7]
+        {
+            new Answer("Bob", 10),
+            new Answer("Mark", 20),
+            new Answer("Dylan", 14),
+            new Answer("Kate", 17),
+            new Answer("Mary", 11),
+            new Answer("John", 5),
+            new Answer("Pete", 8)
+        };
+
+        for (int i = 0; i < Ans.Length; i++)
+        {
+            for (int j = i; j < Ans.Length; j++)
+            {
+                if (Ans[i].Count < Ans[j].Count)
+                {
+                    (Ans[i], Ans[j]) = (Ans[j], Ans[i]);
+                }
+            }
+        }
+
+        for (int i = 0; i < 5; i++)
+        {
+            Ans[i].PrintAnswer();
+            Console.Write($"Per cent: {Ans[i].Count / (Answer.TotalCount * 1.0) * 100}%");
+            Console.WriteLine();
+        }
+    }
+}
