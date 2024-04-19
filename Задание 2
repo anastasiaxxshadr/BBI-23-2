@@ -1,0 +1,98 @@
+using System;
+
+public struct Sportsman
+{
+    private string _name;
+    private int[] _score;
+    private int _distance;
+    private int _totalScore;
+
+    private int CalculateTotalScore()
+    {
+        for (int i = 0; i < _score.Length - 1; i++)
+        {
+            for (int j = 0; j < _score.Length - i - 1; j++)
+            {
+                if (_score[j] > _score[j + 1])
+                {
+                    int temp = _score[j];
+                    _score[j] = _score[j + 1];
+                    _score[j + 1] = temp;
+                }
+            }
+        }
+
+        int sum = 0;
+        for (int i = 1; i < _score.Length - 1; i++)
+        {
+            sum += _score[i];
+        }
+        int distancePoints = 60 + ((_distance - 120) * 2);
+        return sum + distancePoints;
+    }
+
+    public Sportsman(string Name, int[] Score, int Distance)
+    {
+        _name = Name;
+        _score = Score;
+        _distance = Distance;
+        _totalScore = 0;
+        _totalScore = CalculateTotalScore();
+    }
+
+    public string Name => _name;
+    public int[] Score => _score;
+    public int Distance => _distance;
+    public int TotalScore => _totalScore;
+
+    public void PrintResults()
+    {
+        Console.WriteLine($"Name: {_name}, Total Score: {_totalScore}");
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Sportsman[] sp = new Sportsman[7]
+        {
+            new Sportsman("Bob", new int[] { 14, 19, 18, 17, 16 }, 110),
+            new Sportsman("Mark", new int[] { 12, 20, 15, 16, 17 }, 124),
+            new Sportsman("Dylan", new int[] { 13, 16, 13, 15, 17 }, 120),
+            new Sportsman("Kate", new int[] { 17, 19, 18, 17, 18 }, 128),
+            new Sportsman("Mary", new int[] { 17, 16, 14, 15, 16 }, 121),
+            new Sportsman("John", new int[] { 17, 16, 17, 15, 17 }, 122),
+            new Sportsman("Pete", new int[] { 18, 17, 20, 18, 19 }, 130)
+        };
+
+        ShellSort(sp);
+
+        for (int i = 0; i < sp.Length; i++)
+        {
+            Console.WriteLine($"Place {i + 1}:");
+            sp[i].PrintResults();
+        }
+    }
+
+    static void ShellSort(Sportsman[] array)
+    {
+        int n = array.Length;
+        int gap = n / 2;
+        while (gap > 0)
+        {
+            for (int i = gap; i < n; i++)
+            {
+                Sportsman temp = array[i];
+                int j = i;
+                while (j >= gap && array[j - gap].TotalScore < temp.TotalScore)
+                {
+                    array[j] = array[j - gap];
+                    j -= gap;
+                }
+                array[j] = temp;
+            }
+            gap /= 2;
+        }
+    }
+}
