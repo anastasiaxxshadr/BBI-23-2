@@ -1,0 +1,353 @@
+﻿//У меня номера 2,4,6,8,9,10 (начала так писать не переименовала наследников)
+
+public abstract class Task
+{
+    protected string text;
+    public Task(string _text)
+    {
+        text = _text;
+    }
+
+    public string Text()
+    {
+        return text;
+    }
+
+    public abstract string Solve();
+
+}
+
+public class Task1 : Task
+{
+    public Task1(string text) : base(text) { }
+
+    public override string Solve()
+    {
+        string[] words = text.Split(new char[] { ' ', '.', ',', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
+
+        string[] reversedWords = new string[words.Length];
+
+        for (int i = 0; i < words.Length; i++)
+        {
+            if (!string.IsNullOrWhiteSpace(words[i]))
+            {
+                char[] characters = words[i].ToCharArray();
+                Array.Reverse(characters);
+                reversedWords[i] = new string(characters);
+            }
+            else
+            {
+                reversedWords[i] = words[i];
+            }
+        }
+
+        string encryptedText = string.Join(" ", reversedWords);
+
+        string[] decryptedWords = new string[reversedWords.Length];
+        for (int i = 0; i < reversedWords.Length; i++)
+        {
+            if (!string.IsNullOrWhiteSpace(reversedWords[i]))
+            {
+                char[] characters = reversedWords[i].ToCharArray();
+                Array.Reverse(characters);
+                decryptedWords[i] = new string(characters);
+            }
+            else
+            {
+                decryptedWords[i] = reversedWords[i];
+            }
+        }
+
+        string decryptedText = string.Join(" ", decryptedWords);
+
+        return "Зашифрованный: " + encryptedText + "\n" +
+               "Расшифрованный: " + decryptedText;
+    }
+}
+
+class Task2 : Task
+{
+    public Task2(string text) : base(text) { }
+
+    public override string Solve()
+    {
+        int wordCount = 0;
+        int punctuationCount = 0;
+
+        char[] delimiters = { ' ', ',', '.', '!', '?', ':', ';' };
+
+        string[] words = text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (string word in words)
+        {
+            bool containsLetter = false;
+            foreach (char c in word)
+            {
+                if (char.IsLetter(c))
+                {
+                    containsLetter = true;
+                    break;
+                }
+            }
+
+            if (containsLetter)
+            {
+                wordCount++;
+            }
+        }
+
+        foreach (char c in text)
+        {
+            if (char.IsPunctuation(c))
+            {
+                punctuationCount++;
+            }
+        }
+
+        int complexity = wordCount + punctuationCount;
+
+        return "Сложность предложения: " + complexity;
+
+    }
+}
+
+class Task3 : Task
+{
+    public Task3(string text) : base(text) { }
+
+    public override string Solve()
+    {
+        int[] syllableCounts = new int[11];
+
+        string[] words = SplitByDelimiter(text, ' ');
+
+        foreach (string word in words)
+        {
+            int syllableCount = CountSyllables(word);
+
+            if (syllableCount >= 1 && syllableCount <= 10)
+            {
+                syllableCounts[syllableCount]++;
+            }
+        }
+
+        string result = "";
+        for (int i = 1; i <= 10; i++)
+        {
+            result += i + " слогов: " + syllableCounts[i] + "\n";
+        }
+
+        return result;
+    }
+
+    private string[] SplitByDelimiter(string text, char delimiter)
+    {
+        string[] words = new string[100];
+        int wordIndex = 0;
+        int startIndex = 0;
+
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (text[i] == delimiter)
+            {
+                words[wordIndex++] = text.Substring(startIndex, i - startIndex);
+                startIndex = i + 1;
+            }
+        }
+
+        if (startIndex < text.Length)
+        {
+            words[wordIndex++] = text.Substring(startIndex);
+        }
+
+        Array.Resize(ref words, wordIndex);
+
+        return words;
+    }
+
+    private int CountSyllables(string word)
+    {
+        int syllableCount = 0;
+        bool isVowel = false;
+
+        foreach (char c in word)
+        {
+            if (IsVowel(c))
+            {
+                if (!isVowel)
+                {
+                    syllableCount++;
+                }
+                isVowel = true;
+            }
+            else
+            {
+                isVowel = false;
+            }
+        }
+
+        return syllableCount;
+    }
+
+    private bool IsVowel(char c)
+    {
+        return "аеёиоуыэюяaeiouyАЕЁИОУЫЭЮЯAEIOUY".IndexOf(c) != -1;
+    }
+
+}
+
+
+class Task4 : Task
+{
+    public Task4(string text) : base(text) { }
+
+    public override string Solve()
+    {
+        int maxLineLength = 50;
+        string result = "";
+
+        int startIndex = 0;
+
+        while (startIndex < text.Length)
+        {
+            int endIndex = startIndex + maxLineLength;
+
+            if (endIndex >= text.Length)
+            {
+                endIndex = text.Length;
+            }
+            else
+            {
+                while (endIndex > startIndex && text[endIndex] != ' ')
+                {
+                    endIndex--;
+                }
+            }
+
+            string line = text.Substring(startIndex, endIndex - startIndex).Trim();
+            int spaceCount = maxLineLength - line.Length;
+
+         
+            while (spaceCount > 0)
+            {
+                for (int i = 1; i < line.Length - 1 && spaceCount > 0; i += 2)
+                {
+                    line = line.Insert(i, " ");
+                    spaceCount--;
+                }
+            }
+
+            result += line + "\n";
+
+            startIndex = endIndex + 1;
+        }
+
+        return result;
+    }
+}
+
+class Task5 : Task
+{
+    public Task5(string text) : base(text) { }
+
+    public override string Solve()
+    {
+        Dictionary<string, char> codeTable = new Dictionary<string, char>();
+        char nextCode = 'A'; 
+
+        string compressedText = text;
+
+        int index = 0;
+        while (index < compressedText.Length - 1)
+        {
+            string sequence = compressedText.Substring(index, 2);
+
+            if (!codeTable.ContainsKey(sequence))
+            {
+                codeTable.Add(sequence, nextCode);
+                nextCode++;
+            }
+
+            compressedText = compressedText.Replace(sequence, codeTable[sequence].ToString());
+
+            index++;
+        }
+
+        string codeTableText = "Таблица кодов:\n";
+        int columnCount = 0;
+        foreach (var pair in codeTable)
+        {
+            if (text.Contains(pair.Key))
+            {
+                codeTableText += pair.Key + " -> " + pair.Value + "\t";
+                columnCount++;
+                if (columnCount == 6)
+                {
+                    codeTableText += "\n";
+                    columnCount = 0;
+                }
+            }
+        }
+
+        return "Сжатый текст: " + compressedText + "\n\n" + codeTableText;
+    }
+}
+
+class Task6 : Task
+{
+    private Dictionary<char, string> codeTable;
+
+public Task6(string text, Dictionary<char, string> codeTable) : base(text)
+    {
+    this.codeTable = codeTable;
+}
+
+public override string Solve()
+{
+    string decryptedText = text;
+    foreach (var pair in codeTable)
+    {
+        decryptedText = decryptedText.Replace(pair.Key.ToString(), pair.Value);
+    }
+    return decryptedText;
+    }
+}
+
+
+class Program
+{
+    static void Main()
+    {
+        string text = "Первое кругосветное путешествие было осуществлено флотом, возглавляемым португальским исследователем Фернаном Магелланом. Путешествие началось 20 сентября 1519 года, когда флот, состоящий из пяти кораблей и примерно 270 человек, отправился из порту Сан-Лукас в Испании. Хотя Магеллан не закончил свое путешествие из-за гибели в битве на Филиппинах в 1521 году, его экспедиция стала первой, которая успешно обогнула Землю и доказала ее круглую форму. Это путешествие открыло новые морские пути и имело огромное значение для картографии и географических открытий.";
+
+        Task task1 = new Task1(text);
+        Console.WriteLine("Task 1: ");
+        Console.WriteLine(task1.Solve());
+        Console.WriteLine();
+
+        Task task2 = new Task2(text);
+        Console.WriteLine("Task 2: " + task2.Solve());
+        Console.WriteLine();
+
+        Task task3 = new Task3(text);
+        Console.WriteLine("Task 3: " + task3.Solve());
+        Console.WriteLine();
+
+        Task task4 = new Task4(text);
+        Console.WriteLine("Task 4: ");
+        Console.WriteLine(task4.Solve());
+        Console.WriteLine();
+
+        Task task5 = new Task5(text);
+        Console.WriteLine("Task 5: " + task5.Solve());
+        Console.WriteLine();
+
+        Dictionary<char, string> codeTable = new Dictionary<char, string>();
+
+        Task6 task6 = new Task6(text, codeTable);
+        string decryptedText = task6.Solve();
+        Console.WriteLine("Task 6:");
+        Console.WriteLine(decryptedText);
+        Console.WriteLine();
+    }
+}
