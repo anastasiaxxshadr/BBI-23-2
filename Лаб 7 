@@ -1,0 +1,393 @@
+﻿// 1_3
+public abstract class Answer
+{
+    public string Title { get; private set; }
+    public int Count { get; private set; }
+    public double Percentage { get; private set; }
+
+    internal void SetPercentage(double percentage)
+    {
+        Percentage = percentage;
+    }
+
+    public Answer(string title, int count)
+    {
+        Title = title;
+        Count = count;
+    }
+
+    public abstract void Display();
+}
+
+public class PersonOfYear : Answer
+{
+    public PersonOfYear(string title, int count) : base(title, count) { }
+
+    public override void Display()
+    {
+        Console.WriteLine($"Имя: {Title,-7} количество голосов: {Count,-5} процент от общего количества: {Percentage,-5:F2}%");
+    }
+}
+
+public class DiscoveryOfYear : Answer
+{
+    public DiscoveryOfYear(string title, int count) : base(title, count) { }
+
+    public override void Display()
+    {
+        Console.WriteLine($"Открытие года: {Title,-14} количество голосов: {Count,-5} процент от общего количества: {Percentage,-5:F2}%");
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Answer[] personAnswers = new Answer[7]
+        {
+            new PersonOfYear("Bob", 10),
+            new PersonOfYear("Mark", 20),
+            new PersonOfYear("Dylan", 14),
+            new PersonOfYear("Kate", 17),
+            new PersonOfYear("Mary", 11),
+            new PersonOfYear("John", 5),
+            new PersonOfYear("Pete", 15)
+        };
+
+        Answer[] discoveryAnswers = new Answer[6]
+        {
+            new DiscoveryOfYear("Открытие 1", 37),
+            new DiscoveryOfYear("Открытие 2", 21),
+            new DiscoveryOfYear("Открытие 3", 25),
+            new DiscoveryOfYear("Открытие 4", 15),
+            new DiscoveryOfYear("Открытие 5", 8),
+            new DiscoveryOfYear("Открытие 6", 10)
+        };
+
+        int SumAns = 0;
+        foreach (var answer in personAnswers)
+        {
+            SumAns += answer.Count;
+        }
+
+        for (int i = 0; i < personAnswers.Length; i++)
+        {
+            for (int j = i; j < personAnswers.Length; j++)
+            {
+                if (personAnswers[i].Count < personAnswers[j].Count)
+                {
+                    (personAnswers[i], personAnswers[j]) = (personAnswers[j], personAnswers[i]);
+                }
+            }
+        }
+
+        Console.WriteLine("Топ персон года:");
+        for (int i = 0; i < 5; i++)
+        {
+            personAnswers[i].SetPercentage((double)personAnswers[i].Count / SumAns * 100);
+            personAnswers[i].Display();
+        }
+
+        int SumDiscovery = 0;
+        foreach (var answer in discoveryAnswers)
+        {
+            SumDiscovery += answer.Count;
+        }
+
+        for (int i = 0; i < discoveryAnswers.Length; i++)
+        {
+            for (int j = i; j < discoveryAnswers.Length; j++)
+            {
+                if (discoveryAnswers[i].Count < discoveryAnswers[j].Count)
+                {
+                    (discoveryAnswers[i], discoveryAnswers[j]) = (discoveryAnswers[j], discoveryAnswers[i]);
+                }
+            }
+        }
+
+        Console.WriteLine("\nТоп открытий года:");
+        for (int i = 0; i < 5; i++)
+        {
+            discoveryAnswers[i].SetPercentage((double)discoveryAnswers[i].Count / SumDiscovery * 100);
+            discoveryAnswers[i].Display();
+        }
+    }
+}
+
+//2_5
+public struct Skier
+{
+    private string _name;
+    private int _lengthRate;
+    private int _rate;
+    private int _score;
+
+    public Skier(string name, int length, int rate1, int rate2, int rate3, int rate4, int rate5)
+    {
+        _name = name;
+        _lengthRate = (length - 120) * 2 + 60;
+
+        int[] rate = new int[] { rate1, rate2, rate3, rate4, rate5 };
+        Array.Sort(rate);
+        _rate = rate[1] + rate[2] + rate[3];
+
+        _score = _lengthRate + _rate;
+    }
+
+    public string GetName()
+    {
+        return _name;
+    }
+
+    public int GetScore()
+    {
+        return _score;
+    }
+
+    public static void MergeSort(Skier[] skiers, int left, int right)
+    {
+        if (left < right)
+        {
+            int middle = (left + right) / 2;
+
+            MergeSort(skiers, left, middle);
+            MergeSort(skiers, middle + 1, right);
+
+            Merge(skiers, left, middle, right);
+        }
+    }
+
+    private static void Merge(Skier[] skiers, int left, int middle, int right)
+    {
+        int n1 = middle - left + 1;
+        int n2 = right - middle;
+
+        Skier[] L = new Skier[n1];
+        Skier[] R = new Skier[n2];
+
+        Array.Copy(skiers, left, L, 0, n1);
+        Array.Copy(skiers, middle + 1, R, 0, n2);
+
+        int i = 0;
+        int j = 0;
+        int k = left;
+
+        while (i < n1 && j < n2)
+        {
+            if (L[i].GetScore() >= R[j].GetScore())
+            {
+                skiers[k] = L[i];
+                i++;
+            }
+            else
+            {
+                skiers[k] = R[j];
+                j++;
+            }
+            k++;
+        }
+
+        while (i < n1)
+        {
+            skiers[k] = L[i];
+            i++;
+            k++;
+        }
+
+        while (j < n2)
+        {
+            skiers[k] = R[j];
+            j++;
+            k++;
+        }
+    }
+}
+
+public abstract class SkiJumping
+{
+    private string _discipline;
+    protected Skier[] Skiers;
+
+    public SkiJumping(Skier[] skiers, string discipline)
+    {
+        _discipline = discipline;
+        Skiers = skiers;
+    }
+
+    public virtual Skier Jump() { return Skiers[0]; }
+
+    public virtual void Write()
+    {
+        foreach (var skier in Skiers)
+        {
+            Console.WriteLine("{0}\t   {1}", skier.GetName(), skier.GetScore());
+        }
+    }
+
+    public virtual void WriteDis()
+    {
+        Console.WriteLine(_discipline);
+    }
+}
+
+class S120m : SkiJumping
+{
+    public S120m(Skier[] skiers) : base(skiers, "120 метров")
+    {
+    }
+    public override Skier Jump()
+    {
+        return base.Jump();
+    }
+}
+
+class S180m : SkiJumping
+{
+    public S180m(Skier[] skiers) : base(skiers, "180 метров")
+    {
+    }
+
+    public override Skier Jump()
+    {
+        return base.Jump();
+    }
+}
+
+class Program2
+{
+    static void Main()
+    {
+        Skier[] skiers = new Skier[10];
+
+        skiers[0] = new Skier("Конов", 115, 15, 17, 11, 10, 12);
+        skiers[1] = new Skier("Петров", 120, 11, 15, 12, 14, 13);
+        skiers[2] = new Skier("Иванов", 129, 20, 19, 17, 18, 16);
+        skiers[3] = new Skier("Смирнов", 125, 17, 17, 16, 18, 19);
+        skiers[4] = new Skier("Козлов", 128, 20, 18, 18, 15, 14);
+
+        skiers[5] = new Skier("Орлов", 175, 15, 17, 11, 10, 12);
+        skiers[6] = new Skier("Негров", 180, 11, 15, 12, 14, 13);
+        skiers[7] = new Skier("Соколов", 179, 20, 19, 17, 18, 16);
+        skiers[8] = new Skier("Дуров", 176, 17, 17, 16, 18, 19);
+        skiers[9] = new Skier("Попов", 168, 20, 18, 18, 15, 14);
+
+        Skier[] ski120 = new Skier[5];
+        Array.Copy(skiers, 0, ski120, 0, 5);
+        Skier.MergeSort(ski120, 0, ski120.Length - 1);
+        S120m s120 = new S120m(ski120);
+
+        Skier[] ski180 = new Skier[5];
+        Array.Copy(skiers, 5, ski180, 0, 5);
+        Skier.MergeSort(ski180, 0, ski180.Length - 1);
+        S180m s180 = new S180m(ski180);
+
+        Print(s120);
+        Console.WriteLine();
+        Print(s180);
+        static void Print(SkiJumping jumper)
+        {
+            jumper.WriteDis();
+            jumper.Write();
+        }
+
+    }
+}
+
+//3_5
+class Team
+{
+    public string team { get; protected set; }
+    public int scored { get; protected set; }
+    public int missed { get; protected set; }
+    public int points { get; protected set; }
+    public string gender { get; protected set; }
+    public virtual void calculatepoints()
+    {
+        points = scored > missed ? 3 : scored == missed ? 1 : 0;
+    }
+    public virtual void info(int place)
+    {
+        Console.WriteLine($"{place}\t{team}\t{gender}\t{points}");
+    }
+}
+class WomenTeam : Team
+{
+    public WomenTeam(string name, int Scored, int Missed)
+    {
+        team = name;
+        scored = Scored;
+        missed = Missed;
+        gender = "Ж";
+    }
+    public override void calculatepoints()
+    {
+        base.calculatepoints();
+        points += 1;
+    }
+}
+class MenTeam : Team
+{
+    public MenTeam(string name, int Scored, int Missed)
+    {
+        team = name;
+        scored = Scored;
+        missed = Missed;
+        gender = "M";
+    }
+    public override void calculatepoints()
+    {
+        base.calculatepoints();
+        points += 1;
+    }
+}
+class Program3
+{
+    static void Main(string[] args)
+    {
+        MenTeam[] menTeams = {
+            new MenTeam("CSKA", 1, 1),
+            new MenTeam("Dinamo", 0, 3)
+        };
+
+        WomenTeam[] womenTeams = {
+            new WomenTeam("Dinamo", 2, 1),
+            new WomenTeam("Spartak", 3, 0)
+        };
+
+        Team[] allTeams = menTeams.Cast<Team>().Concat(womenTeams.Cast<Team>()).ToArray();
+
+        foreach (var team in allTeams)
+        {
+            team.calculatepoints();
+        }
+
+        sort(allTeams);
+        res(allTeams);
+    }
+
+    private static void sort(Team[] teams)
+    {
+        for (int i = 0; i < 4 - 1; i++)
+        {
+            for (int j = 0; j < 4 - i - 1; j++)
+            {
+                if (teams[j].points < teams[j + 1].points || (teams[j].points == teams[j + 1].points && (teams[j].scored - teams[j].missed) < (teams[j + 1].scored - teams[j + 1].missed)))
+                {
+                    Team t = teams[j];
+                    teams[j] = teams[j + 1];
+                    teams[j + 1] = t;
+                }
+            }
+        }
+    }
+
+    private static void res(Team[] teams)
+    {
+        Console.WriteLine("Результирующая таблица:");
+        Console.WriteLine("Место\tКоманда\tПол\tОчки");
+        for (int i = 0; i < teams.Length; i++)
+        {
+            teams[i].info(i + 1);
+        }
+    }
+}
