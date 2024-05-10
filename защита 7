@@ -1,0 +1,124 @@
+﻿using System;
+
+class Team
+{
+    public string team { get; protected set; }
+    public int scored { get; protected set; }
+    public int missed { get; protected set; }
+    public int points { get; protected set; }
+    public string gender { get; protected set; }
+    public virtual void calculatepoints()
+    {
+        points = scored > missed ? 3 : scored == missed ? 1 : 0;
+    }
+    public virtual void info(int place)
+    {
+        Console.WriteLine($"{place}\t{team}\t{gender}\t{points}");
+    }
+
+    public static Team[] MergeTeams(MenTeam[] menTeams, WomenTeam[] womenTeams)
+    {
+        int totalLength = menTeams.Length + womenTeams.Length;
+        Team[] allTeams = new Team[totalLength];
+
+        int index = 0;
+        foreach (MenTeam team in menTeams)
+        {
+            allTeams[index] = team;
+            index++;
+        }
+
+        foreach (WomenTeam team in womenTeams)
+        {
+            allTeams[index] = team;
+            index++;
+        }
+
+        return allTeams;
+    }
+}
+
+class WomenTeam : Team
+{
+    public WomenTeam(string name, int Scored, int Missed)
+    {
+        team = name;
+        scored = Scored;
+        missed = Missed;
+        gender = "Ж";
+    }
+    public override void calculatepoints()
+    {
+        base.calculatepoints();
+        points += 1;
+    }
+
+}
+
+class MenTeam : Team
+{
+    public MenTeam(string name, int Scored, int Missed)
+    {
+        team = name;
+        scored = Scored;
+        missed = Missed;
+        gender = "M";
+    }
+    public override void calculatepoints()
+    {
+        base.calculatepoints();
+        points += 1;
+    }
+}
+
+class Program3
+{
+    static void Main(string[] args)
+    {
+        MenTeam[] menTeams = {
+            new MenTeam("CSKA", 1, 1),
+            new MenTeam("Dinamo", 0, 3)
+        };
+
+        WomenTeam[] womenTeams = {
+            new WomenTeam("Dinamo", 2, 1),
+            new WomenTeam("Spartak", 3, 0)
+        };
+
+        Team[] allTeams = Team.MergeTeams(menTeams, womenTeams);
+
+        foreach (var team in allTeams)
+        {
+            team.calculatepoints();
+        }
+
+        SortTeams(allTeams);
+        DisplayResults(allTeams);
+    }
+
+    private static void SortTeams(Team[] teams)
+    {
+        for (int i = 0; i < teams.Length - 1; i++)
+        {
+            for (int j = 0; j < teams.Length - i - 1; j++)
+            {
+                if (teams[j].points < teams[j + 1].points || (teams[j].points == teams[j + 1].points && (teams[j].scored - teams[j].missed) < (teams[j + 1].scored - teams[j + 1].missed)))
+                {
+                    Team t = teams[j];
+                    teams[j] = teams[j + 1];
+                    teams[j + 1] = t;
+                }
+            }
+        }
+    }
+
+    private static void DisplayResults(Team[] teams)
+    {
+        Console.WriteLine("Результирующая таблица:");
+        Console.WriteLine("Место\tКоманда\tПол\tОчки");
+        for (int i = 0; i < teams.Length; i++)
+        {
+            teams[i].info(i + 1);
+        }
+    }
+}
