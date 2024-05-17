@@ -1,0 +1,118 @@
+﻿public struct CodePair
+{
+    private string Letters;
+    private char ReplacementChar;
+
+    public CodePair(string letters, char replacementChar)
+    {
+        Letters = letters;
+        ReplacementChar = replacementChar;
+    }
+
+    public string GetLetters()
+    {
+        return Letters;
+    }
+
+    public char GetReplacementChar()
+    {
+        return ReplacementChar;
+    }
+}
+
+public abstract class Task
+{
+    protected string text;
+    public Task(string _text)
+    {
+        text = _text;
+    }
+    public abstract string Solve();
+}
+
+class Task5 : Task
+{
+    public Task5(string text) : base(text) { }
+
+    public override string Solve()
+    {
+        List<CodePair> codeTable = new List<CodePair>();
+        char nextCode = 'A';
+
+        string compressedText = text;
+
+        int index = 0;
+        while (index < compressedText.Length - 1)
+        {
+            string sequence = compressedText.Substring(index, 2);
+
+            if (!codeTable.Any(pair => pair.GetLetters() == sequence))
+            {
+                codeTable.Add(new CodePair(sequence, nextCode));
+                nextCode++;
+            }
+
+            compressedText = compressedText.Replace(sequence, codeTable.First(pair => pair.GetLetters() == sequence).GetReplacementChar().ToString());
+
+            index++;
+        }
+
+        string codeTableText = "Таблица кодов:\n";
+        int columnCount = 0;
+        foreach (var pair in codeTable)
+        {
+            if (text.Contains(pair.GetLetters()))
+            {
+                codeTableText += pair.GetLetters() + " -> " + pair.GetReplacementChar() + "\t";
+                columnCount++;
+                if (columnCount == 6)
+                {
+                    codeTableText += "\n";
+                    columnCount = 0;
+                }
+            }
+        }
+
+        return "Сжатый текст: " + compressedText + "\n\n" + codeTableText;
+    }
+}
+
+class Task6 : Task
+{
+    private List<CodePair> codeTable;
+
+    public Task6(string text, List<CodePair> codeTable) : base(text)
+    {
+        this.codeTable = codeTable;
+    }
+
+    public override string Solve()
+    {
+        string decryptedText = text;
+        foreach (var pair in codeTable)
+        {
+            decryptedText = decryptedText.Replace(pair.GetReplacementChar().ToString(), pair.GetLetters());
+        }
+        return decryptedText;
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        string text = "После многолетних исследований ученые обнаружили тревожную тенденцию в вырубке лесов Амазонии. Анализ данных показал, что основной участник разрушения лесного покрова – человеческая деятельность. За последние десятилетия рост объема вырубки достиг критических показателей. Главными факторами, способствующими этому, являются промышленные рубки, производство древесины, расширение сельскохозяйственных угодий и незаконная добыча древесины. Это приводит к серьезным экологическим последствиям, таким как потеря биоразнообразия, ухудшение климата и угроза вымирания многих видов животных и растений.";
+
+        Task task5 = new Task5(text);
+        Console.WriteLine("Task 5: " + task5.Solve());
+        Console.WriteLine();
+
+        List<CodePair> codeTable = new List<CodePair>();
+
+        Task6 task6 = new Task6(text, codeTable);
+        string decryptedText = task6.Solve();
+        Console.WriteLine("Task 6:");
+        Console.WriteLine(decryptedText);
+        Console.WriteLine();
+    }
+}
